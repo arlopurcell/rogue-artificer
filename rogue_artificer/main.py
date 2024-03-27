@@ -4,7 +4,7 @@ from rogue_artificer import game_map
 from rogue_artificer.engine import Engine
 from rogue_artificer.input_handlers import EventHandler
 from rogue_artificer.entity import Entity
-from rogue_artificer.game_map import GameMap
+from rogue_artificer.procgen import generate_dungeon
 
 def main():
     screen_width = 80
@@ -23,7 +23,7 @@ def main():
     npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), "@", (255, 255, 0))
     entities = {npc, player}
 
-    game_map = GameMap(map_width, map_height)
+    game_map = generate_dungeon(map_width, map_height)
 
     engine = Engine(entities=entities, event_handler=event_handler, game_map=game_map, player=player)
 
