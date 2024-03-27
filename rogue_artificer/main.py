@@ -1,6 +1,7 @@
+import copy
 import tcod
 
-from rogue_artificer import game_map
+from rogue_artificer import entity_factories, game_map
 from rogue_artificer.engine import Engine
 from rogue_artificer.input_handlers import EventHandler
 from rogue_artificer.entity import Entity
@@ -17,6 +18,8 @@ def main():
     room_min_size = 6
     max_rooms = 30
 
+    max_monsters_per_room = 2
+
     tileset = tcod.tileset.load_tilesheet(
         "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
@@ -24,8 +27,7 @@ def main():
     event_handler = EventHandler()
 
     player = Entity(int(screen_width / 2), int(screen_height / 2), "@", (255, 255, 255))
-    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), "@", (255, 255, 0))
-    entities = {npc, player}
+    player = copy.deepcopy(entity_factories.player)
 
     game_map = generate_dungeon(
             max_rooms=max_rooms,
@@ -33,10 +35,11 @@ def main():
             room_max_size=room_max_size,
             map_width=map_width,
             map_height=map_height,
+            max_monsters_per_room=max_monsters_per_room,
             player=player,
     )
 
-    engine = Engine(entities=entities, event_handler=event_handler, game_map=game_map, player=player)
+    engine = Engine(event_handler=event_handler, game_map=game_map, player=player)
 
     with tcod.context.new_terminal(
         screen_width,
