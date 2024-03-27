@@ -8,11 +8,19 @@ from tcod.console import Console
 from rogue_artificer import tile_types
 
 if TYPE_CHECKING:
+    from rogue_artificer.engine import Engine
     from rogue_artificer.entity import Entity
 
 
 class GameMap:
-    def __init__(self, width: int, height: int, entities: Iterable[Entity]):
+    def __init__(
+            self, 
+            engine: Engine,
+            width: int, 
+            height: int, 
+            entities: Iterable[Entity] = (),
+    ):
+        self.engine = engine
         self.width, self.height = width, height
         self.entities = list(entities)
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
@@ -43,7 +51,7 @@ class GameMap:
        console.rgb[0:self.width, 0:self.height] = np.select(
            condlist=[self.visible, self.explored],
            choicelist=[self.tiles["light"], self.tiles["dark"]],
-           default=tile_types.SHROUD
+           default=tile_types.SHROUD,
        )
 
        for entity in self.entities:

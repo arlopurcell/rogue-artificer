@@ -1,20 +1,24 @@
-from typing import Set, Iterable, Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from tcod.context import Context
 from tcod.console import Console
 from tcod.map import compute_fov
 
-from rogue_artificer.entity import Entity
-from rogue_artificer.game_map import GameMap
 from rogue_artificer.input_handlers import EventHandler
+
+if TYPE_CHECKING:
+    from rogue_artificer.entity import Entity
+    from rogue_artificer.game_map import GameMap
 
 
 class Engine:
-    def __init__(self, event_handler: EventHandler, game_map: GameMap, player: Entity):
-        self.event_handler = event_handler
-        self.game_map = game_map
+    game_map: GameMap
+
+    def __init__(self, player: Entity):
+        self.event_handler = EventHandler(self)
         self.player = player
-        self.update_fov()
 
     def handle_enemy_turns(self) -> None:
         for entity in self.game_map.entities:
@@ -22,17 +26,6 @@ class Engine:
                 continue
 
             print(f"The {entity.name} wonders when it'll get a real turn")
-
-    def handle_events(self, events: Iterable[Any]) -> None:
-        for event in events:
-            action = self.event_handler.dispatch(event)
-
-            if action is None:
-                continue
-
-            action.perform(self, self.player)
-            self.handle_enemy_turns()
-            self.update_fov()
 
     def update_fov(self) -> None:
        """Recompute the visible area based on the players point of view."""

@@ -24,22 +24,19 @@ def main():
         "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
     )
 
-    event_handler = EventHandler()
-
-    player = Entity(int(screen_width / 2), int(screen_height / 2), "@", (255, 255, 255))
     player = copy.deepcopy(entity_factories.player)
 
-    game_map = generate_dungeon(
+    engine = Engine(player=player)
+    engine.game_map = generate_dungeon(
             max_rooms=max_rooms,
             room_min_size=room_min_size,
             room_max_size=room_max_size,
             map_width=map_width,
             map_height=map_height,
             max_monsters_per_room=max_monsters_per_room,
-            player=player,
+            engine=engine,
     )
-
-    engine = Engine(event_handler=event_handler, game_map=game_map, player=player)
+    engine.update_fov()
 
     with tcod.context.new_terminal(
         screen_width,
@@ -51,5 +48,4 @@ def main():
         root_console = tcod.console.Console(screen_width, screen_height, order="F")
         while True:
             engine.render(console=root_console, context=context)
-            events = tcod.event.wait()
-            engine.handle_events(events)
+            engine.event_handler.handle_events()

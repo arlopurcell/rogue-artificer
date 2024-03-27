@@ -6,10 +6,10 @@ from typing import Iterator, List, Tuple, TYPE_CHECKING
 import tcod
 
 from rogue_artificer.game_map import GameMap
-from rogue_artificer import entity, entity_factories, tile_types
+from rogue_artificer import entity_factories, tile_types
 
 if TYPE_CHECKING:
-    from rogue_artificer.entity import Entity
+    from rogue_artificer.engine import Engine
 
 class RectangularRoom:
     def __init__(self, x: int, y: int, width: int, height: int):
@@ -80,10 +80,11 @@ def generate_dungeon(
    map_width: int,
    map_height: int,
    max_monsters_per_room: int,
-   player: Entity,
+   engine: Engine,
 ) -> GameMap:
     """Generate a new dungeon map."""
-    dungeon = GameMap(map_width, map_height, entities=[player])
+    player = engine.player
+    dungeon = GameMap(engine, map_width, map_height, entities=[player])
 
     rooms: List[RectangularRoom] = []
 
@@ -107,7 +108,7 @@ def generate_dungeon(
 
         if len(rooms) == 0:
             # The first room, where the player starts.
-            player.x, player.y = new_room.center
+            player.place(*new_room.center, dungeon)
         else:  # All rooms after the first.
             # Dig out a tunnel between this room and the previous one.
             for x, y in tunnel_between(rooms[-1].center, new_room.center):
