@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import random
 from typing import Iterator, List, Tuple, TYPE_CHECKING
 
@@ -6,6 +8,8 @@ import tcod
 from rogue_artificer.game_map import GameMap
 from rogue_artificer import tile_types
 
+if TYPE_CHECKING:
+    from rogue_artificer.entity import Entity
 
 class RectangularRoom:
     def __init__(self, x: int, y: int, width: int, height: int):
@@ -26,7 +30,7 @@ class RectangularRoom:
         """Return the inner area of this room as a 2D array index."""
         return slice(self.x1 + 1, self.x2), slice(self.y1 + 1, self.y2)
 
-    def intersects(self, other) -> bool:
+    def intersects(self, other: RectangularRoom) -> bool:
         """Return True if this room overlaps with another RectangularRoom."""
         return (
             self.x1 <= other.x2
@@ -62,7 +66,7 @@ def generate_dungeon(
    room_max_size: int,
    map_width: int,
    map_height: int,
-   player,
+   player: Entity,
 ) -> GameMap:
    """Generate a new dungeon map."""
    dungeon = GameMap(map_width, map_height)
