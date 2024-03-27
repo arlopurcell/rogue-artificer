@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "rogue-artificer"
+version = "0.1.0"
+description = ""
+authors = ["Arlo J Purcell <arlo@decodable.co>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+tcod = "^16.2.2"
+
+[tool.poetry.scripts]
+game = "rogue_artificer.main:main"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
