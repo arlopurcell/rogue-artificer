@@ -6,26 +6,29 @@ from tcod.context import Context
 from tcod.console import Console
 from tcod.map import compute_fov
 
-from rogue_artificer.input_handlers import EventHandler
+from rogue_artificer.input_handlers import MainGameEventHandler
 
 if TYPE_CHECKING:
-    from rogue_artificer.entity import Entity
+    from rogue_artificer.entity import Actor
     from rogue_artificer.game_map import GameMap
+    from rogue_artificer.input_handlers import EventHandler
 
 
 class Engine:
     game_map: GameMap
 
-    def __init__(self, player: Entity):
-        self.event_handler = EventHandler(self)
+    def __init__(self, player: Actor):
+        self.event_handler: EventHandler = MainGameEventHandler(self)
         self.player = player
 
     def handle_enemy_turns(self) -> None:
-        for entity in self.game_map.entities:
+        for entity in self.game_map.actors:
             if entity == self.player:
                 continue
 
-            print(f"The {entity.name} wonders when it'll get a real turn")
+            if entity.ai:
+                entity.ai.perform()
+
 
     def update_fov(self) -> None:
        """Recompute the visible area based on the players point of view."""
@@ -39,5 +42,12 @@ class Engine:
 
     def render(self, console: Console, context: Context) -> None:
         self.game_map.render(console)
+
+        console.print(
+                x=1,
+                y=47,
+                string=f"HP: {self.player.fighter.hp}/{self.player.fighter.max_hp}",
+        )
+
         context.present(console)
         console.clear()
