@@ -7,6 +7,7 @@ import tcod.event
 from tcod.event import KeySym
 from tcod import libtcodpy
 
+from rogue_artificer import actions
 from rogue_artificer.actions import Action, BumpAction, WaitAction, PickupAction, DropItem
 from rogue_artificer import color, exceptions
 
@@ -139,32 +140,36 @@ class EventHandler(BaseEventHandler):
 class MainGameEventHandler(EventHandler):
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         key = event.sym
+        is_shift = bool(event.mod & (tcod.event.KMOD_LSHIFT | tcod.event.KMOD_RSHIFT))
         player = self.engine.player
 
-        if key in MOVE_KEYS:
+        if not is_shift and key in MOVE_KEYS:
             dx, dy = MOVE_KEYS[key]
             return BumpAction(player, dx, dy)
 
-        elif key in WAIT_KEYS:
+        elif not is_shift and key in WAIT_KEYS:
             return WaitAction(player)
 
         elif key == KeySym.ESCAPE:
             raise SystemExit()
 
-        elif key == KeySym.v:
+        elif not is_shift and key == KeySym.v:
            return HistoryViewer(self.engine)
 
-        elif key in PICKUP_KEYS:
+        elif not is_shift and key in PICKUP_KEYS:
             return PickupAction(player)
 
-        elif key == KeySym.i:
+        elif not is_shift and key == KeySym.i:
             return InventoryActivateHandler(self.engine)
 
-        elif key == KeySym.d:
+        elif not is_shift and key == KeySym.d:
             return InventoryDropHandler(self.engine)
 
-        elif key == KeySym.SLASH:
+        elif not is_shift and key == KeySym.SLASH:
             return LookHandler(self.engine)
+
+        elif is_shift and key == KeySym.PERIOD:
+            return actions.TakeStairsAction(player)
 
         # No valid key was pressed
         return None
