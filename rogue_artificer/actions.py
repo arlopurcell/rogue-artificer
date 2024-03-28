@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional, Tuple
 
+from rogue_artificer import color
+
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
     from rogue_artificer.entity import Actor, Entity
@@ -63,11 +65,15 @@ class MeleeAction(ActionWithDirection):
         damage = self.entity.fighter.power - target.fighter.defense
 
         attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
+        attack_color = color.player_atk if self.entity is self.engine.player else color.enemy_atk
         if damage > 0:
-            print(f"{attack_desc} for {damage}")
+            self.engine.message_log.add_message(
+                f"{attack_desc} for {damage}",
+                attack_color,
+            )
             target.fighter.hp -= damage
         else:
-            print(f"{attack_desc} but does no damage")
+            self.engine.message_log.add_message(f"{attack_desc} but does no damage", attack_color)
 
 class MovementAction(ActionWithDirection):
     def perform(self) -> None:

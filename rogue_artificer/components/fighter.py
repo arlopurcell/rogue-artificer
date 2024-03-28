@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from rogue_artificer import color
 from rogue_artificer.components.base_component import BaseComponent
 from rogue_artificer.input_handlers import GameOverEventHandler
 from rogue_artificer.render_order import RenderOrder
@@ -33,8 +34,10 @@ class Fighter(BaseComponent):
         if self.engine.player is self.entity:
             death_message = "You died!"
             self.engine.event_handler = GameOverEventHandler(self.engine)
+            msg_color = color.player_die
         else:
             death_message = f"{self.entity.name} is dead!"
+            msg_color = color.enemy_die
 
         self.entity.char = "%"
         self.entity.color = (191, 0, 0)
@@ -43,4 +46,4 @@ class Fighter(BaseComponent):
         self.entity.name = f"remains of {self.entity.name}"
         self.entity.render_order = RenderOrder.CORPSE
 
-        print(death_message)
+        self.engine.message_log.add_message(death_message, msg_color)

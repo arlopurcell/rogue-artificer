@@ -1,7 +1,7 @@
 import copy
 import tcod
 
-from rogue_artificer import entity_factories, game_map
+from rogue_artificer import entity_factories, game_map, color
 from rogue_artificer.engine import Engine
 from rogue_artificer.input_handlers import EventHandler
 from rogue_artificer.entity import Entity
@@ -12,7 +12,7 @@ def main():
     screen_height = 50
 
     map_width = 80
-    map_height = 45
+    map_height = 43
 
     room_max_size = 10
     room_min_size = 6
@@ -38,6 +38,10 @@ def main():
     )
     engine.update_fov()
 
+    engine.message_log.add_message(
+            "Hello and welcome, adventurer.", color.welcome_text,
+    )
+
     with tcod.context.new_terminal(
         screen_width,
         screen_height,
@@ -47,5 +51,7 @@ def main():
     ) as context:
         root_console = tcod.console.Console(screen_width, screen_height, order="F")
         while True:
-            engine.render(console=root_console, context=context)
-            engine.event_handler.handle_events()
+            root_console.clear()
+            engine.event_handler.on_render(console=root_console)
+            context.present(root_console)
+            engine.event_handler.handle_events(context)
