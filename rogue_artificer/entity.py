@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import math
 import copy
 from typing import Tuple, Type, TypeVar, TYPE_CHECKING, Optional
 
@@ -66,6 +67,12 @@ class Entity:
                     self.parent.entities.remove(self)
             self.parent = game_map
             game_map.entities.append(self)
+            
+    def distance(self, x: int, y: int) -> float:
+        """
+        Return the distance between the current entity and the given (x, y) coordinate.
+        """
+        return math.sqrt((x - self.x) ** 2 + (y - self.y) ** 2)
 
     def move(self, dx: int, dy: int) -> None:
         # Move the entity by a given amount

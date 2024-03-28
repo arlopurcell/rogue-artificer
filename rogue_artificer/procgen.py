@@ -58,7 +58,17 @@ def place_entities(room: RectangularRoom, dungeon: GameMap, maximum_monsters: in
         y = random.randint(room.y1 + 1, room.y2 - 1)
  
         if not any(entity.x == x and entity.y == y for entity in dungeon.entities):
-            entity_factories.health_potion.spawn(dungeon, x, y)
+            item_chance = random.random()
+
+            if item_chance < 0.4:
+                factory = entity_factories.health_potion
+            elif item_chance < 0.8:
+                factory = entity_factories.fireball_scroll
+            elif item_chance < 0.9:
+                factory = entity_factories.confusion_scroll
+            else:
+                factory = entity_factories.lightning_scroll
+            factory.spawn(dungeon, x, y)
 
 
 def tunnel_between(
