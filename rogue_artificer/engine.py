@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from tcod.console import Console
 from tcod.map import compute_fov
 
+from rogue_artificer import exceptions
 from rogue_artificer.input_handlers import MainGameEventHandler
 from rogue_artificer.render_functions import render_bar, render_names_at_mouse_location
 from rogue_artificer.message_log import MessageLog
@@ -30,7 +31,10 @@ class Engine:
                 continue
 
             if entity.ai:
-                entity.ai.perform()
+                try:
+                    entity.ai.perform()
+                except exceptions.Impossible as e:
+                    print(e)
 
 
     def update_fov(self) -> None:

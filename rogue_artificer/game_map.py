@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 import numpy as np  # type: ignore
 from tcod.console import Console
 
-from rogue_artificer.entity import Actor
+from rogue_artificer.entity import Actor, Item
 from rogue_artificer import tile_types
 
 if TYPE_CHECKING:
@@ -39,6 +39,14 @@ class GameMap:
             entity
             for entity in self.entities
             if isinstance(entity, Actor) and entity.is_alive
+        )
+
+    @property
+    def items(self) -> Iterator[Item]:
+        yield from (
+            entity
+            for entity in self.entities
+            if isinstance(entity, Item)
         )
 
     def get_blocking_entity_at_location(self, location_x: int, location_y: int) -> Optional[Entity]:
