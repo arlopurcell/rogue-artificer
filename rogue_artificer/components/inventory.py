@@ -5,7 +5,8 @@ from typing import List, TYPE_CHECKING
 from rogue_artificer.components.base_component import BaseComponent
 
 if TYPE_CHECKING:
-    from entity import Actor, Item
+    from rogue_artificer.entity import Actor
+    from rogue_artificer.item import Item
 
 
 class Inventory(BaseComponent):
@@ -13,13 +14,14 @@ class Inventory(BaseComponent):
 
     def __init__(self, capacity: int):
         self.capacity = capacity
-        self.items: List[Item] = []
+        self.items: dict[str, Item] = {}
 
-    def drop(self, item: Item) -> None:
+    def drop(self, key: str) -> None:
         """
         Removes an item from the inventory and restores it to the game map, at the player's current location.
         """
-        self.items.remove(item)
+        item = self.items[key]
+        del self.items[key]
         item.place(self.parent.x, self.parent.y, self.game_map)
 
         self.engine.message_log.add_message(f"You dropped the {item.name}.")
