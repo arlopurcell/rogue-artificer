@@ -10,7 +10,8 @@ from rogue_artificer.exceptions import Impossible
 from rogue_artificer.input_handlers import SingleRangedAttackHandler, AreaRangedAttackHandler, ActionOrHandler
 
 if TYPE_CHECKING:
-    from rogue_artificer.entity import Actor, Item
+    from rogue_artificer.entity import Actor
+    from rogue_artificer.item import Item
 
 
 class Consumable(BaseComponent):
@@ -26,13 +27,6 @@ class Consumable(BaseComponent):
         `action` is the context for this activation.
         """
         raise NotImplementedError()
-
-    def consume(self) -> None:
-        """Remove the consumed item from its containing inventory."""
-        entity = self.parent
-        inventory = entity.parent
-        if isinstance(inventory, Inventory):
-            inventory.items.remove(entity)
 
     @property
     def is_quaffable(self) -> bool:
@@ -56,7 +50,6 @@ class HealingConsumable(Consumable):
                 f"You consume the {self.parent.name}, and recover {amount_recovered} HP!",
                 color.health_recovered,
             )
-            self.consume()
         else:
             raise Impossible(f"Your health is already full.")
 

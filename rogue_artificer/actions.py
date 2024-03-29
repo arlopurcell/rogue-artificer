@@ -120,9 +120,7 @@ class PickupAction(Action):
                     raise exceptions.Impossible("Your inventory is full.")
  
                 self.engine.game_map.entities.remove(item)
-                item.parent = self.entity.inventory
-                #item.parent = None
-                inventory.items.append(item)
+                inventory.add(item)
  
                 self.engine.message_log.add_message(f"You picked up the {item.name}!")
                 return
@@ -131,10 +129,10 @@ class PickupAction(Action):
 
 class ItemAction(Action):
     def __init__(
-        self, entity: Actor, item: Item, target_xy: Optional[Tuple[int, int]] = None
+        self, entity: Actor, item_key: str, target_xy: Optional[Tuple[int, int]] = None
     ):
         super().__init__(entity)
-        self.item = item
+        self.item_key = item_key
         if not target_xy:
             target_xy = entity.x, entity.y
         self.target_xy = target_xy
@@ -151,13 +149,15 @@ class ItemAction(Action):
 
 class QuaffAction(ItemAction):
     def perform(self) -> None:
-        if self.item.consumable.is_quaffable:
-            self.item.consumable.activate(self)
+        item = self.entity.inventory.get_one(self.item_key)
+        if item.consumable and item.consumable.is_quaffable:
+            item.consumable.activate(self)
+            self.entity.inventory.consume_key(self.item_key)
         else:
             raise exceptions.Impossible("You can't drink that")
 
 
 class DropItem(ItemAction):
     def perform(self) -> None:
-        self.entity.inventory.drop(self.item)
+        self.entity.inventory.drop(self.item_key)
 

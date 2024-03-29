@@ -3,7 +3,7 @@ import traceback
 
 from rogue_artificer.input_handlers import BaseEventHandler, EventHandler, MainGameEventHandler
 from rogue_artificer.entity import Entity
-from rogue_artificer import setup_game, exceptions
+from rogue_artificer import setup_game, exceptions, color
 from rogue_artificer.ttf import load_ttf
 
 def save_game(handler: BaseEventHandler, filename: str) -> None:

@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 from typing import Callable, Optional, TYPE_CHECKING, Tuple, Union
 
+import tcod
 import tcod.event
 from tcod.event import KeySym
 from tcod import libtcodpy
@@ -10,6 +11,7 @@ from tcod import libtcodpy
 from rogue_artificer import actions
 from rogue_artificer.actions import Action, BumpAction, WaitAction, PickupAction, DropItem
 from rogue_artificer import color, exceptions
+from rogue_artificer.components import inventory
 
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
@@ -87,7 +89,7 @@ class BaseEventHandler(tcod.event.EventDispatch[ActionOrHandler]):
         assert not isinstance(state, Action), f"{self!r} can not handle actions."
         return self
  
-    def on_render(self, console: tcod.Console) -> None:
+    def on_render(self, console: tcod.console.Console) -> None:
         raise NotImplementedError()
  
     def ev_quit(self, event: tcod.event.Quit) -> Optional[Action]:
@@ -321,28 +323,32 @@ class InventoryEventHandler(AskUserEventHandler):
         )
  
         if number_of_items_in_inventory > 0:
-            for i, item in enumerate(self.engine.player.inventory.items):
-                item_key = chr(ord("a") + i)
-                console.print(x + 1, y + i + 1, f"({item_key}) {item.name}")
+            for i, (k, item_stack) in enumerate(self.engine.player.inventory.items.items()):
+                if len(item_stack) == 1:
+                    text = item_stack[0].name
+                else:
+                    text = f"{len(item_stack)} {item_stack[0].name}s"
+                console.print(x + 1, y + i + 1, f"{k} - {text}")
+
         else:
             console.print(x + 1, y + 1, "(Empty)")
  
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         player = self.engine.player
         key = event.sym
-        index = key - KeySym.a
+        #index = key - KeySym.a
+        index = chr(key)
         # TODO handle upper case
  
-        if 0 <= index <= 26:
+        if "a" <= index <= "z":
             try:
-                selected_item = player.inventory.items[index]
+                return self.on_item_selected(index)
             except IndexError:
                 self.engine.message_log.add_message("Invalid entry.", color.invalid)
                 return None
-            return self.on_item_selected(selected_item)
         return super().ev_keydown(event)
  
-    def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         """Called when the user selects a valid item."""
         raise NotImplementedError()
 
@@ -351,7 +357,7 @@ class InventoryActivateHandler(InventoryEventHandler):
  
     TITLE = "Inventory"
  
-    def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         # TODO show description of item?
         return MainGameEventHandler(self.engine)
  
@@ -361,15 +367,15 @@ class InventoryDropHandler(InventoryEventHandler):
  
     TITLE = "Select an item to drop"
  
-    def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         """Drop this item."""
-        return DropItem(self.engine.player, item)
+        return DropItem(self.engine.player, key)
 
 class QuaffHandler(InventoryEventHandler):
     TITLE = "Select an item to drink"
  
-    def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
-        return actions.QuaffAction(self.engine.player, item)
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
+        return actions.QuaffAction(self.engine.player, key)
 
 
 class SelectIndexHandler(AskUserEventHandler):
