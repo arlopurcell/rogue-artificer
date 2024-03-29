@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import random
 from typing import TYPE_CHECKING, Optional, Tuple
 
 from rogue_artificer import color, exceptions
@@ -71,7 +72,7 @@ class MeleeAction(ActionWithDirection):
         if not target:
             raise exceptions.Impossible("Nothing to attack")
 
-        damage = self.entity.fighter.power - target.fighter.defense
+        damage = random.randint(1, self.entity.melee_damage) - random.randint(0, target.fighter.defense)
 
         attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
         attack_color = color.player_atk if self.entity is self.engine.player else color.enemy_atk
@@ -92,7 +93,7 @@ class MovementAction(ActionWithDirection):
         if not self.engine.game_map.tiles["walkable"][dest_x, dest_y]:
             raise exceptions.Impossible("There's a wall there")
         if self.engine.game_map.get_blocking_entity_at_location(dest_x, dest_y):
-            raise exceptions.Impossible("Somethig is in the way")
+            raise exceptions.Impossible("Something is in the way")
 
         self.entity.move(self.dx, self.dy)
 
@@ -160,4 +161,9 @@ class QuaffAction(ItemAction):
 class DropItem(ItemAction):
     def perform(self) -> None:
         self.entity.inventory.drop(self.item_key)
+
+
+class WieldAction(ItemAction):
+    def perform(self) -> None:
+        return self.entity.inventory.wield(self.item_key)
 

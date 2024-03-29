@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Optional
 
 from rogue_artificer.components.base_component import BaseComponent
 from rogue_artificer.exceptions import Impossible
@@ -18,6 +18,7 @@ class Inventory(BaseComponent):
     def __init__(self, capacity: int):
         self.capacity = capacity
         self.items: dict[str, list[Item]] = {}
+        self.wielded_key: Optional[str] = None
 
     def drop(self, key: str) -> None:
         """
@@ -66,3 +67,10 @@ class Inventory(BaseComponent):
 
     def get_one(self, key: str) -> Item:
         return self.items[key][0]
+
+    def wield(self, key: str) -> None:
+        self.wielded_key = key
+
+    @property
+    def wielded(self) -> Optional[Item]:
+        return self.items[self.wielded_key][0] if self.wielded_key else None

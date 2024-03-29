@@ -115,3 +115,8 @@ class Actor(Entity):
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
 
+    @property
+    def melee_damage(self) -> int:
+        weapon = self.inventory.wielded
+        return weapon.melee_damage if weapon else self.fighter.unarmed_damage
+

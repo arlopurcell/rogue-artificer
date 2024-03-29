@@ -13,7 +13,7 @@ class Item(Entity):
         char: str = "?",
         color: Tuple[int, int, int] = (255, 255, 255),
         name: str = "<Unnamed>",
-        consumable: Optional[Consumable],
+        consumable: Optional[Consumable] = None,
     ):
         super().__init__(
             x=x,
@@ -28,3 +28,23 @@ class Item(Entity):
         self.consumable = consumable
         if self.consumable is not None:
             self.consumable.parent = self
+
+    @property
+    def melee_damage(self) -> int:
+        return 1
+
+
+class MeleeWeapon(Item):
+    def __init__(
+        self,
+        *,
+        color: Tuple[int, int, int] = (255, 255, 255),
+        name: str = "<Unnamed>",
+        damage: int = 1,
+    ):
+        super().__init__(color=color, name=name, char=")")
+        self.damage = damage
+
+    @property
+    def melee_damage(self) -> int:
+        return self.damage

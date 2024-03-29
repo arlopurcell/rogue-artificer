@@ -13,25 +13,24 @@ def save_game(handler: BaseEventHandler, filename: str) -> None:
        print("Game saved.")
 
 def main():
-    screen_width = 100
-    screen_height = 80
+    screen_width = 80
+    screen_height = 60 
 
-    tileset = load_ttf("assets/SpaceMono-Regular.ttf", (24, 24))
+    tileset = tcod.tileset.load_truetype_font("assets/MartianMonoNerdFontMono-Medium.ttf", 12, 12)
     handler: BaseEventHandler = setup_game.MainMenu()
 
+    console = tcod.console.Console(screen_width, screen_height, order="F")
     with tcod.context.new_terminal(
-        screen_width,
-        screen_height,
+        console.width,
+        console.height,
         tileset=tileset,
         title="Rogue Artificer",
-        vsync=True,
     ) as context:
-        root_console = tcod.console.Console(screen_width, screen_height, order="F")
         try:
             while True:
-                root_console.clear()
-                handler.on_render(console=root_console)
-                context.present(root_console)
+                console.clear()
+                handler.on_render(console=console)
+                context.present(console, keep_aspect=True, integer_scaling=True)
 
                 try:
                     for event in tcod.event.wait():

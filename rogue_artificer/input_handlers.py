@@ -176,6 +176,9 @@ class MainGameEventHandler(EventHandler):
         elif not is_shift and key == KeySym.q:
             return QuaffHandler(self.engine)
 
+        elif not is_shift and key == KeySym.w:
+            return WieldHandler(self.engine)
+
         # No valid key was pressed
         return None
 
@@ -294,32 +297,40 @@ class InventoryEventHandler(AskUserEventHandler):
         Will move to a different position based on where the player is located, so the player can always see where
         they are.
         """
+        # render parent, then dim
         super().on_render(console)
+        console.rgb["fg"] //= 2
+        console.rgb["bg"] //= 2
+
         number_of_items_in_inventory = len(self.engine.player.inventory.items)
  
         height = number_of_items_in_inventory + 2
  
         if height <= 3:
             height = 3
+        width = 40
  
-        if self.engine.player.x <= 30:
-            x = 40
-        else:
-            x = 0
- 
-        y = 0
- 
-        width = len(self.TITLE) + 4
+        x = (console.width - width) // 2
+        y = 2
  
         console.draw_frame(
             x=x,
             y=y,
             width=width,
             height=height,
-            title=self.TITLE,
+            #title=self.TITLE,
+            #decoration="+-+| |+-+",
+            decoration="╔═╗║ ║╚═╝",
             clear=True,
             fg=(255, 255, 255),
-            bg=(0, 0, 0),
+            bg=(10, 10, 10),
+        )
+        console.print(
+            x=x + (width - len(self.TITLE)) // 2, 
+            y=y, 
+            string=self.TITLE,
+            fg=(0, 0, 0),
+            bg=(255, 255, 255),
         )
  
         if number_of_items_in_inventory > 0:
@@ -328,7 +339,7 @@ class InventoryEventHandler(AskUserEventHandler):
                     text = item_stack[0].name
                 else:
                     text = f"{len(item_stack)} {item_stack[0].name}s"
-                console.print(x + 1, y + i + 1, f"{k} - {text}")
+                console.print(x + 1, y + i + 1, f"{k} - {text.capitalize()}")
 
         else:
             console.print(x + 1, y + 1, "(Empty)")
@@ -376,6 +387,12 @@ class QuaffHandler(InventoryEventHandler):
  
     def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         return actions.QuaffAction(self.engine.player, key)
+
+class WieldHandler(InventoryEventHandler):
+    TITLE = "Select an item to wield"
+
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
+        return actions.WieldAction(self.engine.player, key)
 
 
 class SelectIndexHandler(AskUserEventHandler):
@@ -496,8 +513,8 @@ class PopupMessage(BaseEventHandler):
     def on_render(self, console: tcod.console.Console) -> None:
         """Render the parent and dim the result, then print the message on top."""
         self.parent.on_render(console)
-        console.tiles_rgb["fg"] //= 8
-        console.tiles_rgb["bg"] //= 8
+        console.rgb["fg"] //= 8
+        console.rgb["bg"] //= 8
  
         console.print(
             console.width // 2,
