@@ -15,7 +15,7 @@ from rogue_artificer.components import inventory
 
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
-    from rogue_artificer.entity import Item
+    from rogue_artificer.item import Item
 
 MOVE_KEYS = {
    # Arrow keys.
@@ -179,6 +179,9 @@ class MainGameEventHandler(EventHandler):
         elif not is_shift and key == KeySym.w:
             return WieldHandler(self.engine)
 
+        elif is_shift and key == KeySym.w:
+            return WearHandler(self.engine)
+
         # No valid key was pressed
         return None
 
@@ -291,6 +294,10 @@ class InventoryEventHandler(AskUserEventHandler):
     """
  
     TITLE = "<missing title>"
+    relevance_filter = True
+
+    def is_relevant(self, item: Item) -> bool:
+        return True
  
     def on_render(self, console: tcod.console.Console) -> None:
         """Render an inventory menu, which displays the items in the inventory, and the letter to select them.
@@ -302,7 +309,8 @@ class InventoryEventHandler(AskUserEventHandler):
         console.rgb["fg"] //= 2
         console.rgb["bg"] //= 2
 
-        number_of_items_in_inventory = len(self.engine.player.inventory.items)
+        relevant_items = {k: stack for k, stack in self.engine.player.inventory.items.items() if not self.relevance_filter or self.is_relevant(stack[0])}
+        number_of_items_in_inventory = len(relevant_items)
  
         height = number_of_items_in_inventory + 2
  
@@ -318,8 +326,6 @@ class InventoryEventHandler(AskUserEventHandler):
             y=y,
             width=width,
             height=height,
-            #title=self.TITLE,
-            #decoration="+-+| |+-+",
             decoration="╔═╗║ ║╚═╝",
             clear=True,
             fg=(255, 255, 255),
@@ -334,29 +340,39 @@ class InventoryEventHandler(AskUserEventHandler):
         )
  
         if number_of_items_in_inventory > 0:
-            for i, (k, item_stack) in enumerate(self.engine.player.inventory.items.items()):
+            for i, (k, item_stack) in enumerate(relevant_items.items()):
                 if len(item_stack) == 1:
                     text = item_stack[0].name
                 else:
                     text = f"{len(item_stack)} {item_stack[0].name}s"
-                console.print(x + 1, y + i + 1, f"{k} - {text.capitalize()}")
 
+                if k == self.engine.player.inventory.wielded_key:
+                    text += " (wielded)"
+                else:
+                    for slot, armor_key in self.engine.player.inventory.armor_keys.items():
+                        if k == armor_key:
+                            text += f" (worn on {slot})"
+                
+                console.print(x + 1, y + i + 1, f"{k} - {text.capitalize()}")
         else:
             console.print(x + 1, y + 1, "(Empty)")
+        # TODO show something like "(Press '.' to show irrelevant items)"
  
     def ev_keydown(self, event: tcod.event.KeyDown) -> Optional[ActionOrHandler]:
         player = self.engine.player
         key = event.sym
-        #index = key - KeySym.a
-        index = chr(key)
-        # TODO handle upper case
  
-        if "a" <= index <= "z":
+        # TODO handle upper case
+        if KeySym.a <= key <= KeySym.z:
+            index = chr(key)
             try:
                 return self.on_item_selected(index)
             except IndexError:
                 self.engine.message_log.add_message("Invalid entry.", color.invalid)
                 return None
+        elif key == KeySym.PERIOD:
+            self.relevance_filter = not self.relevance_filter
+            return None
         return super().ev_keydown(event)
  
     def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
@@ -385,14 +401,31 @@ class InventoryDropHandler(InventoryEventHandler):
 class QuaffHandler(InventoryEventHandler):
     TITLE = "Select an item to drink"
  
+    def is_relevant(self, item: Item) -> bool:
+        return bool(item.consumable) and item.consumable.is_quaffable
+
     def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         return actions.QuaffAction(self.engine.player, key)
 
 class WieldHandler(InventoryEventHandler):
     TITLE = "Select an item to wield"
 
+    def is_relevant(self, item: Item) -> bool:
+        from rogue_artificer.item import MeleeWeapon
+        return isinstance(item, MeleeWeapon)
+
     def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
         return actions.WieldAction(self.engine.player, key)
+
+class WearHandler(InventoryEventHandler):
+    TITLE = "Select an item to wear"
+
+    def is_relevant(self, item: Item) -> bool:
+        from rogue_artificer.item import Armor
+        return isinstance(item, Armor)
+
+    def on_item_selected(self, key: str) -> Optional[ActionOrHandler]:
+        return actions.WearAction(self.engine.player, key)
 
 
 class SelectIndexHandler(AskUserEventHandler):

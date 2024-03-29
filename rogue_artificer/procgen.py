@@ -7,7 +7,7 @@ import tcod
 
 from rogue_artificer.game_map import GameMap
 from rogue_artificer import entity_factories, tile_types
-from rogue_artificer.item import MeleeWeapon
+from rogue_artificer.item import MeleeWeapon, Armor, ArmorSlot
 
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
@@ -105,11 +105,17 @@ def generate_dungeon(
     """Generate a new dungeon map."""
     player = engine.player
 
-    # Give player a sword
+    # Give player basic equiptment
     player.inventory.add(MeleeWeapon(
         color=(127, 127, 127),
         name="sword",
         damage=10,
+    ))
+    player.inventory.add(Armor(
+        color=(127, 127, 127),
+        name="cloak",
+        slot=ArmorSlot.CLOAK,
+        defense=5,
     ))
 
     dungeon = GameMap(engine, map_width, map_height, entities=[player])

@@ -120,3 +120,7 @@ class Actor(Entity):
         weapon = self.inventory.wielded
         return weapon.melee_damage if weapon else self.fighter.unarmed_damage
 
+    @property
+    def defense(self) -> int:
+        return self.fighter.base_defense + self.inventory.defense
+

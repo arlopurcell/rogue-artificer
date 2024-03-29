@@ -5,9 +5,10 @@ from typing import List, TYPE_CHECKING, Optional
 from rogue_artificer.components.base_component import BaseComponent
 from rogue_artificer.exceptions import Impossible
 
+
 if TYPE_CHECKING:
     from rogue_artificer.entity import Actor
-    from rogue_artificer.item import Item
+    from rogue_artificer.item import Item, ArmorSlot
 
 
 ALL_KEYS = "abcdefghijklmnopqrstuvwxyz"
@@ -19,6 +20,7 @@ class Inventory(BaseComponent):
         self.capacity = capacity
         self.items: dict[str, list[Item]] = {}
         self.wielded_key: Optional[str] = None
+        self.armor_keys: dict[ArmorSlot, str] = {}
 
     def drop(self, key: str) -> None:
         """
@@ -74,3 +76,13 @@ class Inventory(BaseComponent):
     @property
     def wielded(self) -> Optional[Item]:
         return self.items[self.wielded_key][0] if self.wielded_key else None
+
+    def wear(self, key: str) -> None:
+        self.armor_keys[self.get_one(key).slot] = key
+
+    @property
+    def defense(self) -> int:
+        return sum(self.get_one(item_key).defense for item_key in self.armor_keys.values())
+
+
+

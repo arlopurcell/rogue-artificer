@@ -5,7 +5,6 @@ from typing import Optional, TYPE_CHECKING
 from rogue_artificer import actions, color
 from rogue_artificer.components import ai
 from rogue_artificer.components.base_component import BaseComponent
-from rogue_artificer.components.inventory import Inventory
 from rogue_artificer.exceptions import Impossible
 from rogue_artificer.input_handlers import SingleRangedAttackHandler, AreaRangedAttackHandler, ActionOrHandler
 

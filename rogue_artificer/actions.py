@@ -4,10 +4,11 @@ import random
 from typing import TYPE_CHECKING, Optional, Tuple
 
 from rogue_artificer import color, exceptions
+from rogue_artificer.item import Item, Armor, ArmorSlot
 
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
-    from rogue_artificer.entity import Actor, Entity, Item
+    from rogue_artificer.entity import Actor, Entity
 
 class Action:
     def __init__(self, entity: Actor) -> None:
@@ -72,7 +73,7 @@ class MeleeAction(ActionWithDirection):
         if not target:
             raise exceptions.Impossible("Nothing to attack")
 
-        damage = random.randint(1, self.entity.melee_damage) - random.randint(0, target.fighter.defense)
+        damage = random.randint(1, self.entity.melee_damage) - random.randint(0, target.defense)
 
         attack_desc = f"{self.entity.name.capitalize()} attacks {target.name}"
         attack_color = color.player_atk if self.entity is self.engine.player else color.enemy_atk
@@ -167,3 +168,10 @@ class WieldAction(ItemAction):
     def perform(self) -> None:
         return self.entity.inventory.wield(self.item_key)
 
+class WearAction(ItemAction):
+    def perform(self) -> None:
+        item = self.entity.inventory.get_one(self.item_key)
+        if isinstance(item, Armor):
+            return self.entity.inventory.wear(self.item_key)
+        else:
+            raise exceptions.Impossible("You can't wear that")

@@ -1,8 +1,13 @@
-from typing import Optional, Tuple
+from __future__ import annotations
+
+from typing import Optional, Tuple, TYPE_CHECKING
+from enum import auto, StrEnum
 
 from rogue_artificer.entity import Entity 
-from rogue_artificer.components.consumable import Consumable
 from rogue_artificer.render_order import RenderOrder
+
+if TYPE_CHECKING:
+    from rogue_artificer.components.consumable import Consumable
 
 class Item(Entity):
     def __init__(
@@ -39,8 +44,8 @@ class MeleeWeapon(Item):
         self,
         *,
         color: Tuple[int, int, int] = (255, 255, 255),
-        name: str = "<Unnamed>",
-        damage: int = 1,
+        name: str,
+        damage: int,
     ):
         super().__init__(color=color, name=name, char=")")
         self.damage = damage
@@ -48,3 +53,23 @@ class MeleeWeapon(Item):
     @property
     def melee_damage(self) -> int:
         return self.damage
+
+class ArmorSlot(StrEnum):
+    HEAD = auto()
+    BODY = auto()
+    HANDS = auto()
+    FEET = auto()
+    CLOAK = auto()
+
+class Armor(Item):
+    def __init__(
+        self,
+        *,
+        color: Tuple[int, int, int] = (255, 255, 255),
+        name: str,
+        defense: int,
+        slot: ArmorSlot,
+    ):
+        super().__init__(color=color, name=name, char="[")
+        self.defense = defense
+        self.slot = slot
