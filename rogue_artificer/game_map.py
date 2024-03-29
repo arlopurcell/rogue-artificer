@@ -5,7 +5,8 @@ from typing import TYPE_CHECKING, Iterable, Iterator, Optional
 import numpy as np  # type: ignore
 from tcod.console import Console
 
-from rogue_artificer.entity import Actor, Item
+from rogue_artificer.entity import Actor
+from rogue_artificer.item import  Item
 from rogue_artificer import tile_types
 
 if TYPE_CHECKING:

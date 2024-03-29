@@ -16,9 +16,9 @@ if TYPE_CHECKING:
 class Consumable(BaseComponent):
     parent: Item
 
-    def get_action(self, consumer: Actor) -> Optional[ActionOrHandler]:
-        """Try to return the action for this item."""
-        return actions.ItemAction(consumer, self.parent)
+    #def get_action(self, consumer: Actor) -> Optional[ActionOrHandler]:
+    #    """Try to return the action for this item."""
+    #    return actions.ItemAction(consumer, self.parent)
 
     def activate(self, action: actions.ItemAction) -> None:
         """Invoke this items ability.
@@ -34,10 +34,18 @@ class Consumable(BaseComponent):
         if isinstance(inventory, Inventory):
             inventory.items.remove(entity)
 
+    @property
+    def is_quaffable(self) -> bool:
+        return False
+
 
 class HealingConsumable(Consumable):
     def __init__(self, amount: int):
         self.amount = amount
+
+    @property
+    def is_quaffable(self) -> bool:
+        return True
 
     def activate(self, action: actions.ItemAction) -> None:
         consumer = action.entity

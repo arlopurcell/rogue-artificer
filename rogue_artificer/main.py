@@ -4,6 +4,7 @@ import traceback
 from rogue_artificer.input_handlers import BaseEventHandler, EventHandler, MainGameEventHandler
 from rogue_artificer.entity import Entity
 from rogue_artificer import setup_game, exceptions
+from rogue_artificer.ttf import load_ttf
 
 def save_game(handler: BaseEventHandler, filename: str) -> None:
    """If the current event handler has an active Engine then save it."""
@@ -12,13 +13,10 @@ def save_game(handler: BaseEventHandler, filename: str) -> None:
        print("Game saved.")
 
 def main():
-    screen_width = 80
-    screen_height = 50
+    screen_width = 100
+    screen_height = 80
 
-    tileset = tcod.tileset.load_tilesheet(
-        "assets/dejavu10x10_gs_tc.png", 32, 8, tcod.tileset.CHARMAP_TCOD
-    )
-
+    tileset = load_ttf("assets/SpaceMono-Regular.ttf", (24, 24))
     handler: BaseEventHandler = setup_game.MainMenu()
 
     with tcod.context.new_terminal(

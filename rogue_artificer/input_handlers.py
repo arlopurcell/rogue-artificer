@@ -171,6 +171,9 @@ class MainGameEventHandler(EventHandler):
         elif is_shift and key == KeySym.PERIOD:
             return actions.TakeStairsAction(player)
 
+        elif not is_shift and key == KeySym.q:
+            return QuaffHandler(self.engine)
+
         # No valid key was pressed
         return None
 
@@ -344,13 +347,13 @@ class InventoryEventHandler(AskUserEventHandler):
         raise NotImplementedError()
 
 class InventoryActivateHandler(InventoryEventHandler):
-    """Handle using an inventory item."""
+    """Handle viewing inventory items."""
  
-    TITLE = "Select an item to use"
+    TITLE = "Inventory"
  
     def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
-        """Return the action for the selected item."""
-        return item.consumable.get_action(self.engine.player)
+        # TODO show description of item?
+        return MainGameEventHandler(self.engine)
  
  
 class InventoryDropHandler(InventoryEventHandler):
@@ -361,6 +364,12 @@ class InventoryDropHandler(InventoryEventHandler):
     def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
         """Drop this item."""
         return DropItem(self.engine.player, item)
+
+class QuaffHandler(InventoryEventHandler):
+    TITLE = "Select an item to drink"
+ 
+    def on_item_selected(self, item: Item) -> Optional[ActionOrHandler]:
+        return actions.QuaffAction(self.engine.player, item)
 
 
 class SelectIndexHandler(AskUserEventHandler):

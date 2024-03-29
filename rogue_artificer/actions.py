@@ -146,7 +146,16 @@ class ItemAction(Action):
  
     def perform(self) -> None:
         """Invoke the items ability, this action will be given to provide context."""
-        self.item.consumable.activate(self)
+        raise NotImplementedError()
+
+
+class QuaffAction(ItemAction):
+    def perform(self) -> None:
+        if self.item.consumable.is_quaffable:
+            self.item.consumable.activate(self)
+        else:
+            raise exceptions.Impossible("You can't drink that")
+
 
 class DropItem(ItemAction):
     def perform(self) -> None:

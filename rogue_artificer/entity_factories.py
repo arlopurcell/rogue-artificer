@@ -2,7 +2,8 @@ from rogue_artificer.components.ai import HostileEnemy
 from rogue_artificer.components import consumable
 from rogue_artificer.components.fighter import Fighter
 from rogue_artificer.components.inventory import Inventory
-from rogue_artificer.entity import Actor, Item
+from rogue_artificer.entity import Actor
+from rogue_artificer.item import Item
 
 player = Actor(
         char="@", 
