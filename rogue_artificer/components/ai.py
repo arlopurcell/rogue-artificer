@@ -13,9 +13,9 @@ if TYPE_CHECKING:
 
 
 class BaseAI(Action):
-    entity: Actor
+    actor: Actor
 
-    def perform(self) -> None:
+    def perform(self) -> int:
         raise NotImplementedError()
 
     def get_path_to(self, dest_x: int, dest_y: int) -> List[Tuple[int, int]]:
@@ -24,9 +24,9 @@ class BaseAI(Action):
         If there is no valid path then returns an empty list.
         """
         # Copy the walkable array.
-        cost = np.array(self.entity.parent.tiles["walkable"], dtype=np.int8)
+        cost = np.array(self.actor.parent.tiles["walkable"], dtype=np.int8)
 
-        for entity in self.entity.parent.entities:
+        for entity in self.actor.parent.entities:
             # Check that an enitiy blocks movement and the cost isn't zero (blocking.)
             if entity.blocks_movement and cost[entity.x, entity.y]:
                 # Add to the cost of a blocked position.
@@ -39,7 +39,7 @@ class BaseAI(Action):
         graph = tcod.path.SimpleGraph(cost=cost, cardinal=2, diagonal=3)
         pathfinder = tcod.path.Pathfinder(graph)
 
-        pathfinder.add_root((self.entity.x, self.entity.y))  # Start position.
+        pathfinder.add_root((self.actor.x, self.actor.y))  # Start position.
 
         # Compute the path to the destination and remove the starting point.
         path: List[List[int]] = pathfinder.path_to((dest_x, dest_y))[1:].tolist()
@@ -48,27 +48,27 @@ class BaseAI(Action):
         return [(index[0], index[1]) for index in path]
 
 class HostileEnemy(BaseAI):
-    def __init__(self, entity: Actor):
-        super().__init__(entity)
+    def __init__(self, actor: Actor):
+        super().__init__(actor)
         self.path: List[Tuple[int, int]] = []
 
-    def perform(self) -> None:
+    def perform(self) -> int:
         target = self.engine.player
-        dx = target.x - self.entity.x
-        dy = target.y - self.entity.y
+        dx = target.x - self.actor.x
+        dy = target.y - self.actor.y
         distance = max(abs(dx), abs(dy)) # Chebyshev distance
 
-        if self.engine.game_map.visible[self.entity.x, self.entity.y]:
+        if self.engine.game_map.visible[self.actor.x, self.actor.y]:
             if distance <= 1:
-                return MeleeAction(self.entity, dx, dy).perform()
+                return MeleeAction(self.actor, dx, dy).perform()
             
             self.path = self.get_path_to(target.x, target.y)
 
         if self.path:
             dest_x, dest_y = self.path.pop(0)
-            return MovementAction(self.entity, dest_x - self.entity.x, dest_y - self.entity.y).perform()
+            return MovementAction(self.actor, dest_x - self.actor.x, dest_y - self.actor.y).perform()
 
-        return WaitAction(self.entity).perform()
+        return WaitAction(self.actor).perform()
 
 
 class ConfusedEnemy(BaseAI):
@@ -78,20 +78,21 @@ class ConfusedEnemy(BaseAI):
     """
  
     def __init__(
-        self, entity: Actor, previous_ai: Optional[BaseAI], turns_remaining: int
+        self, actor: Actor, previous_ai: Optional[BaseAI], turns_remaining: int
     ):
-        super().__init__(entity)
+        super().__init__(actor)
  
         self.previous_ai = previous_ai
         self.turns_remaining = turns_remaining
  
-    def perform(self) -> None:
+    def perform(self) -> int:
         # Revert the AI back to the original state if the effect has run its course.
         if self.turns_remaining <= 0:
             self.engine.message_log.add_message(
-                f"The {self.entity.name} is no longer confused."
+                f"The {self.actor.name} is no longer confused."
             )
-            self.entity.ai = self.previous_ai
+            self.actor.ai = self.previous_ai
+            return 0
         else:
             # Pick a random direction
             direction_x, direction_y = random.choice(
@@ -111,4 +112,4 @@ class ConfusedEnemy(BaseAI):
  
             # The actor will either try to move or attack in the chosen random direction.
             # Its possible the actor will just bump into the wall, wasting a turn.
-            return BumpAction(self.entity, direction_x, direction_y,).perform()
+            return BumpAction(self.actor, direction_x, direction_y,).perform()

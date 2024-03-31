@@ -8,6 +8,7 @@ from tcod.console import Console
 from rogue_artificer.entity import Actor
 from rogue_artificer.item import  Item
 from rogue_artificer import tile_types
+from rogue_artificer.turn_tracker import TurnTracker
 
 if TYPE_CHECKING:
     from rogue_artificer.engine import Engine
@@ -25,6 +26,11 @@ class GameMap:
         self.engine = engine
         self.width, self.height = width, height
         self.entities = list(entities)
+
+        self.turn_tracker = TurnTracker(entities)
+        # pop off the player on the front so they don't get double turns
+        self.turn_tracker.pop()
+
         self.tiles = np.full((width, height), fill_value=tile_types.wall, order="F")
 
         self.visible = np.full((width, height), fill_value=False, order="F")

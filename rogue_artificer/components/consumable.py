@@ -41,7 +41,7 @@ class HealingConsumable(Consumable):
         return True
 
     def activate(self, action: actions.ItemAction) -> None:
-        consumer = action.entity
+        consumer = action.actor
         amount_recovered = consumer.fighter.heal(self.amount)
 
         if amount_recovered > 0:
@@ -58,7 +58,7 @@ class LightningDamageConsumable(Consumable):
         self.maximum_range = maximum_range
  
     def activate(self, action: actions.ItemAction) -> None:
-        consumer = action.entity
+        consumer = action.actor
         target = None
         closest_distance = self.maximum_range + 1.0
  
@@ -95,7 +95,7 @@ class ConfusionConsumable(Consumable):
         return None
  
     def activate(self, action: actions.ItemAction) -> None:
-        consumer = action.entity
+        consumer = action.actor
         target = action.target_actor
  
         if not self.engine.game_map.visible[action.target_xy]:
@@ -110,7 +110,7 @@ class ConfusionConsumable(Consumable):
             color.status_effect_applied,
         )
         target.ai = ai.ConfusedEnemy(
-            entity=target, previous_ai=target.ai, turns_remaining=self.number_of_turns,
+            actor=target, previous_ai=target.ai, turns_remaining=self.number_of_turns,
         )
         self.consume()
 

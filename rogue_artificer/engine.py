@@ -26,16 +26,23 @@ class Engine:
         self.player = player
 
     def handle_enemy_turns(self) -> None:
-        for entity in self.game_map.actors:
-            if entity == self.player:
-                continue
+        while True:
+            if not self.player.is_alive:
+                return
 
-            if entity.ai:
+            actor = self.game_map.turn_tracker.pop()
+            if not actor.is_alive:
+                continue
+            if actor == self.player:
+                return
+            if actor.ai:
+                delay = 10 # default value in case action fails
                 try:
-                    entity.ai.perform()
+                    delay = actor.ai.perform()
                 except exceptions.Impossible as e:
                     print(e)
 
+                self.game_map.turn_tracker.push(actor, delay)
 
     def update_fov(self) -> None:
        """Recompute the visible area based on the players point of view."""

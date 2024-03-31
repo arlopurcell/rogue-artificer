@@ -110,10 +110,32 @@ class Actor(Entity):
         self.inventory = inventory
         self.inventory.parent = self
 
+    def __str__(self):
+        return f"Actor [{self.name}]"
+
+    def __repr__(self):
+        return f"Actor [{self.name}]"
+
+
+    def spawn(self: T, game_map: GameMap, x: int, y: int) -> T:
+        clone = super().spawn(game_map, x, y)
+        game_map.turn_tracker.push(clone, 0)
+        return clone
+
     @property
     def is_alive(self) -> bool:
         """Returns True as long as this actor can perform actions."""
         return bool(self.ai)
+
+    @property
+    def move_delay(self) -> int:
+        # TODO look at move speed modifiers in inventory
+        return 10
+
+    @property
+    def melee_delay(self) -> int:
+        # TODO look at melee speed modifiers in inventory
+        return 10
 
     @property
     def melee_damage(self) -> int:

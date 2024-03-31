@@ -104,6 +104,7 @@ class EventHandler(BaseEventHandler):
         action_or_state = self.dispatch(event)
         if isinstance(action_or_state, BaseEventHandler):
             return action_or_state
+
         if self.handle_action(action_or_state):
             # A valid action was performed.
             if not self.engine.player.is_alive:
@@ -121,10 +122,11 @@ class EventHandler(BaseEventHandler):
             return False
  
         try:
-            action.perform()
+            delay = action.perform()
         except exceptions.Impossible as exc:
             self.engine.message_log.add_message(exc.args[0], color.impossible)
             return False  # Skip enemy turn on exceptions.
+        self.engine.game_map.turn_tracker.push(self.engine.player, delay)
  
         self.engine.handle_enemy_turns()
  

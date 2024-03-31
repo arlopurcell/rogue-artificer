@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from typing import Optional, Tuple, TYPE_CHECKING
-from enum import auto, StrEnum
+from enum import auto, Enum
 
 from rogue_artificer.entity import Entity 
 from rogue_artificer.render_order import RenderOrder
@@ -54,7 +54,7 @@ class MeleeWeapon(Item):
     def melee_damage(self) -> int:
         return self.damage
 
-class ArmorSlot(StrEnum):
+class ArmorSlot(str, Enum):
     HEAD = auto()
     BODY = auto()
     HANDS = auto()
